@@ -4,7 +4,16 @@
 {% block content %}
 
 <div class="container mt-4">
-    <p>Super duper Secret Content</p>
+    <h2>Hallo <span class="text-danger">{{user}}</span></h2>
+    <p>{{get_flashed_messages()[0]}}</p>
+    <div class="p-2 bg-secondary text-white rounded container">
+        <h2>Hier ist super secret content!</h1>
+    </div>
+    <div class="mt-4">
+
+        <a href="{{url_for('logout')}}" class="bg-primary text-white px-4 py-2">Log Out</a>
+    </div>
+
 </div>
 
 

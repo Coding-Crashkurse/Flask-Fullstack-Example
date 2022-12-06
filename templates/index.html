@@ -4,9 +4,20 @@
 
 <div class="mt-5 p-5 bg-primary text-white rounded container">
     <h1>Willkommen auf unserer Website</h1>
+
     <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Odio ut et ipsum laborum, ullam sed enim necessitatibus
         temporibus maiores adipisci!</p>
-    <p>Wenn du noch keinen Account hast, lege einen an!</p>
+
+    {% if user %}
+    <h4>Du bist eingeloggt als User {{user}}. Zum Dashboard?</h4>
+    <a href="{{url_for('dashboard')}}" class="text-white">Zum Dashboard</a>
+    {% else %}
+    <p>Bitte <a class="text-white" href="{{url_for('register')}}">registriere dich</a> dich oder <a class="text-white"
+            href="{{url_for('login')}}">logge
+            dich ein</a></p>
+    {% endif %}
+
 </div>
+
 
 {% endblock content %}

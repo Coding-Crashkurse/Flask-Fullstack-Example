@@ -16,6 +16,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+db.init_app(app)
+
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -36,10 +42,14 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember me')
     submit = SubmitField()
 
+with app.app_context():
+    db.create_all()
 
 
 @app.route('/')
 def index():
+    if current_user.is_active:
+        return render_template('index.html', user=current_user.username)
     return render_template('index.html')
 
 
@@ -47,22 +57,37 @@ def index():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        flash('Form validated!')
-        return redirect(url_for("index"))
+        if form.username.data == form.username.data:
+            new_user = User(username=form.username.data, password=form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for("index"))
     return render_template("register.html", form=form)
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        flash('Form validated!')
-        return redirect(url_for("index"))
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.password == form.password.data:
+            login_user(user=user, remember=form.remember)
+            flash('Du wurdest erfolgreich eingeloggt')
+            return redirect(url_for("dashboard"))
+        return render_template("login.html", form=form, error="Invalid Credentials")
     return render_template("login.html", form=form)
 
 
 @app.route("/dashboard", methods=["POST", "GET"])
+@login_required
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", user=current_user.username)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 
 if __name__ == '__main__':
